@@ -22,13 +22,10 @@ def new_telco_data():
 
     # Create SQL query.
     sql_query = """
-                SELECT * FROM customers as c
-                JOIN contract_types as ct
-                ON c.contract_type_id = ct.contract_type_id
-                JOIN internet_service_types as i
-                ON c.internet_service_type_id = i.internet_service_type_id
-                JOIN payment_types as p
-                ON c.payment_type_id = p.payment_type_id;
+                SELECT * FROM customers
+                JOIN contract_types USING (contract_type_id)
+                JOIN internet_service_types USING (internet_service_type_id)
+                JOIN payment_types USING (payment_type_id);
                 """
     
     # Read in DataFrame from Codeup db.
