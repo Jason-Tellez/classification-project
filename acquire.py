@@ -1,7 +1,10 @@
-import pandas as pd
-import numpy as np
 import os
 from env import host, user, password
+import numpy as np
+import pandas as pd
+
+
+################### Connects to Sequel Ace using credentials ###################
 
 def get_connection(db, user=user, host=host, password=password):
     '''
@@ -11,8 +14,8 @@ def get_connection(db, user=user, host=host, password=password):
     '''
     return f'mysql+pymysql://{user}:{password}@{host}/{db}'
 
-
-###################### Acquire Telco Data ######################    
+    
+################### Create new dataframe from SQL db ###################
     
 def new_telco_data():
     '''
@@ -22,18 +25,39 @@ def new_telco_data():
 
     # Create SQL query.
     sql_query = """
-                SELECT * FROM customers
-                JOIN contract_types USING (contract_type_id)
-                JOIN internet_service_types USING (internet_service_type_id)
-                JOIN payment_types USING (payment_type_id);
+           SELECT c.customer_id,
+                c.gender, 
+                c.senior_citizen,
+                c.partner,
+                c.dependents,
+                c.tenure,
+                c.phone_service,
+                c.multiple_lines,
+                c.online_security,
+                c.device_protection,
+                c.tech_support,
+                c.streaming_tv,
+                c.streaming_movies,
+                c.paperless_billing,
+                c.monthly_charges,
+                c.total_charges,
+                c.churn,
+                ct.contract_type,
+                i.internet_service_type,
+                p.payment_type
+            FROM customers as c
+            JOIN contract_types as ct USING (contract_type_id)
+            JOIN internet_service_types as i USING (internet_service_type_id)
+            JOIN payment_types as p USING (payment_type_id);
                 """
     
-    # Read in DataFrame from Codeup db.
+    # Read in DataFrame from Codeup's SQL db.
     df = pd.read_sql(sql_query, get_connection('telco_churn'))
     
     return df
 
 
+################### Acquire existing csv file ###################
 
 def get_telco_data():
     '''
@@ -48,9 +72,40 @@ def get_telco_data():
     else:
         
         # Read fresh data from db into a DataFrame.
-        df = new_titanic_data()
+        df = new_telco_data()
         
         # Write DataFrame to a csv file.
         df.to_csv('telco_df.csv')
         
     return df
+
+
+################### Dataframe overview ###################
+
+def gen_view(df):
+    '''
+    This function will give a general overview of a dataframe.
+    This includes:
+        - statistical description of the df's numerical values
+        - info about df's columns and their values
+        - dimensions (rows x columns) of df
+        - if any null values exist in each column
+        - if any observations/rows are duplicated
+    '''
+    print('------------------------------')
+    print('General overview of dataframe.')
+    print('------------------------------\n')
+    print('Descriptive stats:\n')
+    print(df.describe())
+    print('\n')
+    print('Column and row info:')
+    print(df.info())
+    print('\n')
+    print('Dimensions of df:')
+    print(df.shape)
+    print('\n')
+    print('Null values:')
+    print(df.isnull().sum())
+    print('\n')
+    dups = df['customer_id'].duplicated().any()
+    print('Any duplicates:', dups)
