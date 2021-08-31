@@ -91,6 +91,7 @@ def gen_view(df):
         - dimensions (rows x columns) of df
         - if any null values exist in each column
         - if any observations/rows are duplicated
+        - return columns value counts
     '''
     print('------------------------------')
     print('General overview of dataframe.')
@@ -109,3 +110,23 @@ def gen_view(df):
     print('\n')
     dups = df['customer_id'].duplicated().any()
     print('Any duplicates:', dups)
+    print('\n')
+    for i in range(len(df.columns)):
+        if df[df.columns[i]].dtype == 'object':
+            print(f'{df.columns[i]}:\n{df[df.columns[i]].value_counts().sort_values()}\n')
+            print('----------\n')
+        elif df[df.columns[i]].dtype == 'int64':
+            print(f'{df.columns[i]}:\n{df[df.columns[i]].value_counts(bins=5, sort=False)}\n')
+            print('----------\n')
+            
+            
+################### Plots histograms of column-distributions ###################
+
+def plot_dist(quant_vars, cat_vars):
+    '''
+    Function loops through all columns and plot each distribution.
+    '''
+    for col in df.columns[1:]:
+        plt.title(f'Histogram for {col}')
+        sns.histplot(x=df[col], hue=df.churn, bins=10)
+        plt.show()
